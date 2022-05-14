@@ -124,3 +124,4 @@ mmseg_train_data/
 cache/
 data/
 output/
+test_results/
