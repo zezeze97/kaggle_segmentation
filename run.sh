@@ -1,6 +1,6 @@
 #!/bin/bash
-export PATH=/opt/conda/bin:$PATH
-export PYTHONPATH=/home/zhangzr/mmsegmentation_kaggle:$PYTHONPATH
+# export PATH=/opt/conda/bin:$PATH
+# export PYTHONPATH=/home/zhangzr/mmsegmentation_kaggle:$PYTHONPATH
 GPU=$2
 
 config=upernet_convnext_base_fp16_512x512_160k_kaggle
