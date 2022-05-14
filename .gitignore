@@ -123,3 +123,4 @@ input/
 mmseg_train_data/
 cache/
 data/
+output/

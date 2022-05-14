@@ -12,6 +12,6 @@ if [ $1 = "train" ]; then
     CUDA_VISIBLE_DEVICES=$GPU PORT=23472 ./tools/dist_train.sh configs/convnext/${config}.py 1 --work-dir cache/${config} 
 elif [ $1 = "test" ]; then
     
-    CUDA_VISIBLE_DEVICES=$GPU python tools/test.py configs/convnext/${config}.py ./cache/${config}/latest.pth
+    CUDA_VISIBLE_DEVICES=$GPU python ./tools/test.py configs/convnext/${config}.py ./cache/${config}/latest.pth --show-dir output/${config}/
 fi
 
