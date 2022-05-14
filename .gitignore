@@ -118,3 +118,8 @@ mmseg/.mim
 
 # Pytorch
 *.pth
+
+input/
+mmseg_train_data/
+cache/
+data/
