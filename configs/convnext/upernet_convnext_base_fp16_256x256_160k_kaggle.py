@@ -137,8 +137,8 @@ lr_config = dict(
     power=1.0,
     min_lr=0.0,
     by_epoch=False)
-runner = dict(type='IterBasedRunner', max_iters=16000)
-checkpoint_config = dict(by_epoch=False, interval=1600)
+runner = dict(type='IterBasedRunner', max_iters=160000)
+checkpoint_config = dict(by_epoch=False, interval=16000)
 evaluation = dict(interval=1600, metric='mIoU', pre_eval=True)
 fp16 = dict()
 auto_resume = False
