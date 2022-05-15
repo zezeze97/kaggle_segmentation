@@ -11,6 +11,10 @@ def cityscapes_classes():
         'bicycle'
     ]
 
+def kaggle_classes():
+    """Kaggle class names for external use."""
+    return ['large_bowel', 'small_bowel', 'stomach']
+
 
 def ade_classes():
     """ADE20K class names for external use."""
@@ -133,6 +137,10 @@ def cityscapes_palette():
             [107, 142, 35], [152, 251, 152], [70, 130, 180], [220, 20, 60],
             [255, 0, 0], [0, 0, 142], [0, 0, 70], [0, 60, 100], [0, 80, 100],
             [0, 0, 230], [119, 11, 32]]
+
+def kaggle_palette():
+    """Kaggle palette for external use."""
+    return [[0,0,0], [128,128,128], [255,255,255]]
 
 
 def ade_palette():
@@ -278,7 +286,8 @@ dataset_aliases = {
         'coco_stuff164k'
     ],
     'isaid': ['isaid', 'iSAID'],
-    'stare': ['stare', 'STARE']
+    'stare': ['stare', 'STARE'],
+    'kaggle': ['kaggle']
 }
 
 

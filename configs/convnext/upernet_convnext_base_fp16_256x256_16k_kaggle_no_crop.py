@@ -26,7 +26,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0, avg_non_ignore=True)),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=512,
@@ -39,9 +39,9 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4, avg_non_ignore=True)),
     train_cfg=dict(),
-    test_cfg=dict(mode='slide', crop_size=(256,256), stride=(341, 341)))
+    test_cfg=dict(mode='whole'))
 dataset_type = 'CustomDataset'
 data_root = 'mmseg_train_data/'
 classes = ['large_bowel', 'small_bowel', 'stomach']
@@ -52,8 +52,7 @@ img_scale = (256, 256)
 train_pipeline = [
     dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', max_value='max'),
     dict(type='LoadAnnotations',reduce_zero_label=True),
-    dict(type='Resize', img_scale=img_scale, ratio_range=(0.5, 2.0)),
-    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
+    dict(type='Resize', img_scale=img_scale, keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
     dict(type='PhotoMetricDistortion'),
     dict(type='Normalize', **img_norm_cfg),
@@ -135,8 +134,8 @@ lr_config = dict(
     power=1.0,
     min_lr=0.0,
     by_epoch=False)
-runner = dict(type='IterBasedRunner', max_iters=160000)
-checkpoint_config = dict(by_epoch=False, interval=16000)
-evaluation = dict(interval=16000, metric='mIoU', pre_eval=True)
+runner = dict(type='IterBasedRunner', max_iters=16000)
+checkpoint_config = dict(by_epoch=False, interval=1600)
+evaluation = dict(interval=1600, metric='mIoU', pre_eval=True)
 fp16 = dict()
 auto_resume = False
