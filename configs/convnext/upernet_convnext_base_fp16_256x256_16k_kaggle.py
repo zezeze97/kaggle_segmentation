@@ -1,3 +1,6 @@
+from lib2to3.pytree import convert
+
+
 norm_cfg = dict(type='SyncBN', requires_grad=True)
 custom_imports = dict(imports='mmcls.models', allow_failed_imports=False)
 checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-base_3rdparty_32xb128-noema_in1k_20220301-2a0ee547.pth'
@@ -43,15 +46,15 @@ model = dict(
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
 dataset_type = 'CustomDataset'
-data_root = 'mmseg_train_data/'
+data_root = 'data/kaggle_segmentation_clean_data/'
 classes = ['large_bowel', 'small_bowel', 'stomach']
 palette = [[0,0,0], [128,128,128], [255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
 crop_size = (256, 256)
 img_scale = (256, 256)
 train_pipeline = [
-    dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', max_value='max'),
-    dict(type='LoadAnnotations',reduce_zero_label=True),
+    dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', force_uint8=True, force_3channel=True),
+    dict(type='LoadAnnotations',reduce_zero_label=False),
     dict(type='Resize', img_scale=img_scale, ratio_range=(0.5, 2.0)),
     dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5),
@@ -62,7 +65,7 @@ train_pipeline = [
     dict(type='Collect', keys=['img', 'gt_semantic_seg'])
 ]
 test_pipeline = [
-    dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', max_value='max'),
+    dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', force_uint8=True, force_3channel=True),
     dict(
         type='MultiScaleFlipAug',
         img_scale=img_scale,
@@ -81,22 +84,22 @@ data = dict(
     train=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images',
-        ann_dir='labels',
+        img_dir='train',
+        ann_dir='label',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/fold_0.txt",
+        split="splits/train.txt",
         classes=classes,
         palette=palette,
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         data_root=data_root,
-        img_dir='images',
-        ann_dir='labels',
+        img_dir='train',
+        ann_dir='label',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/holdout_0.txt",
+        split="splits/val.txt",
         classes=classes,
         palette=palette,
         pipeline=test_pipeline),

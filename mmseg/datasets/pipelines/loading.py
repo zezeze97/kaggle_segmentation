@@ -27,18 +27,23 @@ class LoadImageFromFile(object):
             Defaults to ``dict(backend='disk')``.
         imdecode_backend (str): Backend for :func:`mmcv.imdecode`. Default:
             'cv2'
+        convert (bool): convert uint16 -> uint8
     """
 
     def __init__(self,
                  to_float32=False,
                  color_type='color',
                  file_client_args=dict(backend='disk'),
-                 imdecode_backend='cv2'):
+                 imdecode_backend='cv2',
+                 force_uint8=False,
+                 force_3channel=False):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.file_client_args = file_client_args.copy()
         self.file_client = None
         self.imdecode_backend = imdecode_backend
+        self.force_uint8 = force_uint8
+        self.force_3channel = force_3channel
 
     def __call__(self, results):
         """Call functions to load image and get image meta information.
@@ -64,6 +69,12 @@ class LoadImageFromFile(object):
         if self.to_float32:
             img = img.astype(np.float32)
 
+        if self.force_uint8:
+            img = (img - img.min())/(img.max() - img.min())*255.0 # scale image to [0, 255]
+            img = img.astype('uint8') # uint16 -> uint8
+        
+        if self.force_3channel:
+            img = np.stack([img for _ in range(3)], -1)
         results['filename'] = filename
         results['ori_filename'] = results['img_info']['filename']
         results['img'] = img

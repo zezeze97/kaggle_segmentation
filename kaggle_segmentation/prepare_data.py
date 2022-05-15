@@ -1,8 +1,9 @@
 import os
+from select import select
 import shutil
 import cv2
 import numpy as np
-
+import random
 
 def list_allfile(path,all_files=[]):    
     if os.path.exists(path):
@@ -33,8 +34,11 @@ def clean_data(src_img_root_path, src_label_root_path, target_root_path):
         img_name = img_path.split('/')[-1]
         mask = cv2.imread(os.path.join(src_label_root_path, img_name), cv2.IMREAD_UNCHANGED)
         if len(np.unique(mask)) > 1:
-            shutil.copy(os.path.join(src_label_root_path, img_name), os.path.join(target_root_path, 'label_3channel',img_name))
-            shutil.copy(os.path.join(src_img_root_path, img_name), os.path.join(target_root_path, 'train', img_name))
+            if cv2.imread(os.path.join(src_img_root_path, img_name)) is not None:
+                shutil.copy(os.path.join(src_label_root_path, img_name), os.path.join(target_root_path, 'label_3channel',img_name))
+                shutil.copy(os.path.join(src_img_root_path, img_name), os.path.join(target_root_path, 'train', img_name))
+            else:
+                print('error loading', os.path.join(src_img_root_path, img_name))
 
 def convert_mask(src_mask_path, target_mask_path):
     all_mask_list = os.listdir(src_mask_path)
@@ -47,7 +51,28 @@ def convert_mask(src_mask_path, target_mask_path):
         print(np.unique(new_mask))
         cv2.imwrite(os.path.join(target_mask_path,mask_name),new_mask)
 
+def data_split(full_list, ratio, shuffle=False):
+    n_total = len(full_list)
+    offset = int(n_total * ratio)
+    if n_total == 0 or offset < 1:
+        return [], full_list
+    if shuffle:
+        random.shuffle(full_list)
+    sublist_1 = full_list[:offset]
+    sublist_2 = full_list[offset:]
+    return sublist_1, sublist_2
+
+
 if __name__ == '__main__':
-    src_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_clean_data/label_3channel'
-    target_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_clean_data/label'
-    convert_mask(src_mask_path, target_mask_path)
+
+    full_img_list = os.listdir('data/kaggle_segmentation_clean_data/train')
+    train_img_list, val_img_list = data_split(full_img_list, ratio=0.9, shuffle=True)
+    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_clean_data/splits/train.txt','w')as f:
+        for item in train_img_list:
+            f.write(item.split('.')[0]+'\n')
+    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_clean_data/splits/val.txt','w')as f:
+        for item in val_img_list:
+            f.write(item.split('.')[0]+'\n')
+    
+
+   
