@@ -32,17 +32,13 @@ class LoadImageFromFile(object):
     def __init__(self,
                  to_float32=False,
                  color_type='color',
-                 max_value=None,
                  file_client_args=dict(backend='disk'),
-                 imdecode_backend='cv2',
-                 force_3chan=False):
+                 imdecode_backend='cv2'):
         self.to_float32 = to_float32
         self.color_type = color_type
         self.file_client_args = file_client_args.copy()
         self.file_client = None
         self.imdecode_backend = imdecode_backend
-        self.max_value = max_value
-        self.force_3chan = force_3chan
 
     def __call__(self, results):
         """Call functions to load image and get image meta information.
@@ -66,15 +62,7 @@ class LoadImageFromFile(object):
         img = mmcv.imfrombytes(
             img_bytes, flag=self.color_type, backend=self.imdecode_backend)
         if self.to_float32:
-            if self.max_value is None:
-                img = img.astype(np.float32)
-            elif self.max_value == "max":
-                img = img.astype(np.float32) / (img.max() + 1e-7)
-            else:
-                img = img.astype(np.float32) / self.max_value
-
-        if self.force_3chan:
-            img = np.stack([img for _ in range(3)], -1)
+            img = img.astype(np.float32)
 
         results['filename'] = filename
         results['ori_filename'] = results['img_info']['filename']
@@ -117,13 +105,11 @@ class LoadAnnotations(object):
     def __init__(self,
                  reduce_zero_label=False,
                  file_client_args=dict(backend='disk'),
-                 binarize=False,
                  imdecode_backend='pillow'):
         self.reduce_zero_label = reduce_zero_label
         self.file_client_args = file_client_args.copy()
         self.file_client = None
         self.imdecode_backend = imdecode_backend
-        self.binarize = binarize
 
     def __call__(self, results):
         """Call function to load multiple types annotations.
@@ -147,20 +133,20 @@ class LoadAnnotations(object):
         gt_semantic_seg = mmcv.imfrombytes(
             img_bytes, flag='unchanged',
             backend=self.imdecode_backend).squeeze().astype(np.uint8)
-
         # modify if custom classes
         if results.get('label_map', None) is not None:
+            # Add deep copy to solve bug of repeatedly
+            # replace `gt_semantic_seg`, which is reported in
+            # https://github.com/open-mmlab/mmsegmentation/pull/1445/
+            gt_semantic_seg_copy = gt_semantic_seg.copy()
             for old_id, new_id in results['label_map'].items():
-                gt_semantic_seg[gt_semantic_seg == old_id] = new_id
-        if self.binarize:
-            gt_semantic_seg = (gt_semantic_seg != 0).astype(np.uint8)
+                gt_semantic_seg[gt_semantic_seg_copy == old_id] = new_id
         # reduce zero_label
         if self.reduce_zero_label:
             # avoid using underflow conversion
             gt_semantic_seg[gt_semantic_seg == 0] = 255
             gt_semantic_seg = gt_semantic_seg - 1
             gt_semantic_seg[gt_semantic_seg == 254] = 255
-        
         results['gt_semantic_seg'] = gt_semantic_seg
         results['seg_fields'].append('gt_semantic_seg')
         return results
