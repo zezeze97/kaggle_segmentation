@@ -22,7 +22,7 @@ model = dict(
         pool_scales=(1, 2, 3, 6),
         channels=512,
         dropout_ratio=0.1,
-        num_classes=3,
+        num_classes=4,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
@@ -35,17 +35,17 @@ model = dict(
         num_convs=1,
         concat_input=False,
         dropout_ratio=0.1,
-        num_classes=3,
+        num_classes=4,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
             type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4, avg_non_ignore=True)),
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
-dataset_type = 'CustomDataset'
+dataset_type = 'Kaggle_Dataset'
 data_root = 'data/kaggle_segmentation_clean_data/'
-classes = ['large_bowel', 'small_bowel', 'stomach']
-palette = [[0,0,0], [128,128,128], [255,255,255]]
+classes = ['background','large_bowel', 'small_bowel', 'stomach']
+palette = [[0,0,0], [64,64,64],[128,128,128], [255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
 crop_size = (256, 256)
 img_scale = (256, 256)
