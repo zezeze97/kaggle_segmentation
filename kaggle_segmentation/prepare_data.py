@@ -24,9 +24,13 @@ def move(src_root_path, target_root_path):
 
     all_file_list = list_allfile(src_root_path)
     for img_path in all_file_list:
-        img_name_list = img_path.split('/')
-        img_name = img_name_list[-3] + '_slice_'+ img_name_list[-1].split('_')[1] + '.png'
-        shutil.copy(img_path, os.path.join(target_root_path,'label',img_name))
+        if cv2.imread(img_path, cv2.IMREAD_UNCHANGED) is not None:
+            img_name_list = img_path.split('/')
+            img_name = img_name_list[-3] + '_slice_'+ img_name_list[-1].split('_')[1] + '.png'
+            shutil.copy(img_path, os.path.join(target_root_path,'label',img_name))
+        else:
+            print('Error loading: ', img_path)
+       
 
 def clean_data(src_img_root_path, src_label_root_path, target_root_path):
     all_file_list = list_allfile(src_img_root_path)
@@ -65,14 +69,19 @@ def data_split(full_list, ratio, shuffle=False):
 
 if __name__ == '__main__':
 
-    full_img_list = os.listdir('data/kaggle_segmentation_clean_data/train')
+
+    full_img_list = os.listdir('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/image')
     train_img_list, val_img_list = data_split(full_img_list, ratio=0.9, shuffle=True)
-    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_clean_data/splits/train.txt','w')as f:
+    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/splits/train.txt','w')as f:
         for item in train_img_list:
             f.write(item.split('.')[0]+'\n')
-    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_clean_data/splits/val.txt','w')as f:
+    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/splits/val.txt','w')as f:
         for item in val_img_list:
             f.write(item.split('.')[0]+'\n')
+    
+
+
+    
     
 
    
