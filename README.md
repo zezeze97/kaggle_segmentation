@@ -28,3 +28,6 @@ bash run.sh train $GPU
 # 测试
 bash run.sh test $GPU
 ```
+
+# 在线可视化预测
+[kaggle_segmentation/inference_demo.ipynb](kaggle_segmentation/inference_demo.ipynb)
