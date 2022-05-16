@@ -13,7 +13,7 @@ def cityscapes_classes():
 
 def kaggle_classes():
     """Kaggle class names for external use."""
-    return ['large_bowel', 'small_bowel', 'stomach']
+    return ['background','large_bowel', 'small_bowel', 'stomach']
 
 
 def ade_classes():
@@ -140,7 +140,7 @@ def cityscapes_palette():
 
 def kaggle_palette():
     """Kaggle palette for external use."""
-    return [[0,0,0], [128,128,128], [255,255,255]]
+    return [[0,0,0], [64,64,64], [128,128,128], [255,255,255]]
 
 
 def ade_palette():

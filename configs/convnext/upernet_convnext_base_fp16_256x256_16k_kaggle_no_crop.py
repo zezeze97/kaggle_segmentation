@@ -22,7 +22,7 @@ model = dict(
         pool_scales=(1, 2, 3, 6),
         channels=512,
         dropout_ratio=0.1,
-        num_classes=3,
+        num_classes=4,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
@@ -35,7 +35,7 @@ model = dict(
         num_convs=1,
         concat_input=False,
         dropout_ratio=0.1,
-        num_classes=3,
+        num_classes=4,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
@@ -44,8 +44,8 @@ model = dict(
     test_cfg=dict(mode='whole'))
 dataset_type = 'CustomDataset'
 data_root = 'data/kaggle_segmentation_clean_data/'
-classes = ['large_bowel', 'small_bowel', 'stomach']
-palette = [[0,0,0], [128,128,128], [255,255,255]]
+classes = ['background','large_bowel', 'small_bowel', 'stomach']
+palette = [[0,0,0], [64,64,64],[128,128,128], [255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
 crop_size = (256, 256)
 img_scale = (256, 256)
@@ -101,11 +101,14 @@ data = dict(
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        data_root='../../input/uw-madison-gi-tract-image-segmentation/',
+        # data_root='../../input/uw-madison-gi-tract-image-segmentation/',
+        data_root=data_root,
         test_mode=True,
-        img_dir='test/images',
+        # img_dir='test/images',
+        img_dir='train',
         img_suffix=".png",
         seg_map_suffix='.png',
+        split="splits/val.txt",
         classes=classes,
         palette=palette,
         pipeline=test_pipeline))
@@ -134,8 +137,8 @@ lr_config = dict(
     power=1.0,
     min_lr=0.0,
     by_epoch=False)
-runner = dict(type='IterBasedRunner', max_iters=160000)
-checkpoint_config = dict(by_epoch=False, interval=16000)
-evaluation = dict(interval=16000, metric='mIoU', pre_eval=True)
+runner = dict(type='IterBasedRunner', max_iters=16000)
+checkpoint_config = dict(by_epoch=False, interval=1600)
+evaluation = dict(interval=1600, metric='mIoU', pre_eval=True)
 fp16 = dict()
 auto_resume = False
