@@ -3,8 +3,8 @@ export PATH=/opt/conda/bin:$PATH
 export PYTHONPATH=/home/zhangzr/mmsegmentation_kaggle:$PYTHONPATH
 GPU=$2
 
-#config=upernet_convnext_base_fp16_256x256_160k_kaggle
-config=upernet_convnext_base_fp16_256x256_160k_kaggle_no_crop
+config=upernet_convnext_base_fp16_256x256_160k_kaggle
+#config=upernet_convnext_base_fp16_256x256_160k_kaggle_no_crop
 
 
 
