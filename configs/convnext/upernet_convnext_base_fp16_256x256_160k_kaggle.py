@@ -18,7 +18,7 @@ model = dict(
     decode_head=dict(
         type='UPerHead',
         in_channels=[128, 256, 512, 1024],
-        in_index=[0, 1, 2, 3],
+        in_index=[0, 1, 2, 4],
         pool_scales=(1, 2, 3, 6),
         channels=512,
         dropout_ratio=0.1,
@@ -49,6 +49,7 @@ palette = [[0,0,0], [64,64,64],[128,128,128], [255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
 crop_size = (256, 256)
 img_scale = (256, 256)
+#调这个
 train_pipeline = [
     dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', force_uint8=True, force_3channel=True),
     dict(type='LoadAnnotations',reduce_zero_label=False),
@@ -76,8 +77,8 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=8,
-    workers_per_gpu=4,
+    samples_per_gpu=16,
+    workers_per_gpu=2,
     train=dict(
         type=dataset_type,
         data_root=data_root,
