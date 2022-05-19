@@ -33,6 +33,12 @@ bash run.sh train $GPU
 bash run.sh test $GPU
 ```
 
-# 在线可视化预测
+# 可视化预测
 
 [kaggle_segmentation/inference_demo.ipynb](kaggle_segmentation/inference_demo.ipynb)
+
+# TODO
+- 图片尺寸较小, 可以尝试upernet origin size?(默认1/4大小)
+- train pipline去除random crop
+- 图片case的相关性，更好的建模方式？
+- 2.5d data？
