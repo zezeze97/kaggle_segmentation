@@ -10,7 +10,6 @@
 
 [参考](https://www.kaggle.com/code/andradaolteanu/aw-madison-eda-in-depth-mask-exploration)
 
-
 # 环境安装
 
 ```sh
@@ -20,9 +19,9 @@ conda activate mmseg-kaggle
 pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu113
 pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.11.0/index.html
 git clone https://github.com/zezeze97/kaggle_segmentation.git
+cd {path of project}
 pip install -e .  
 ```
-
 
 # 训练，测试
 
@@ -38,6 +37,7 @@ bash run.sh test $GPU
 [kaggle_segmentation/inference_demo.ipynb](kaggle_segmentation/inference_demo.ipynb)
 
 # TODO
+
 - 图片尺寸较小, 可以尝试upernet origin size?(默认1/4大小)
 - train pipline去除random crop
 - 图片case的相关性，更好的建模方式？
