@@ -87,7 +87,8 @@ class UPerHeadOriginSize(BaseDecodeHead):
                         stride=1,
                         padding=int(kernel_size - 1) // 2,
                         norm_cfg=self.norm_cfg,
-                        act_cfg=self.act_cfg),
+                        act_cfg=self.act_cfg,
+                        inplace=False),
                     Upsample(
                         scale_factor=up_scale,
                         mode='bilinear',
