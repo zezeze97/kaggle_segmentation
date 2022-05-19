@@ -43,7 +43,7 @@ model = dict(
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
 dataset_type = 'Kaggle_Dataset'
-data_root = 'data/kaggle_segmentation_data/'
+data_root = 'data/kaggle_segmentation_clean_data/'
 classes = ['background','large_bowel', 'small_bowel', 'stomach']
 palette = [[0,0,0], [64,64,64],[128,128,128], [255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
