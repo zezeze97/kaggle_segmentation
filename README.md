@@ -42,3 +42,5 @@ bash run.sh test $GPU
 - train pipline去除random crop
 - 图片case的相关性，更好的建模方式？
 - 2.5d data？
+- 更换backbone, swin transformer
+- 实验结果整理
