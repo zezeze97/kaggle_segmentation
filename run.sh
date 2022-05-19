@@ -6,7 +6,7 @@ GPU=$2
 #config=upernet_convnext_base_fp16_256x256_160k_kaggle
 #config=upernet_convnext_base_fp16_256x256_160k_kaggle_no_crop
 #config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_no_crop
-config=upernet_swin_base_patch4_window7_512x512_160k_ade20k_pretrain_224x224_22K
+config=upernet_swin_base_patch4_window7_256x256_160k_kaggle_pretrain_224x224_22K
 
 
 
