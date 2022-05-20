@@ -26,7 +26,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0, avg_non_ignore=True)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=512,
@@ -39,7 +39,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4, avg_non_ignore=True)),
+            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
 dataset_type = 'Kaggle_Dataset'
@@ -137,7 +137,7 @@ lr_config = dict(
     min_lr=0.0,
     by_epoch=False)
 runner = dict(type='IterBasedRunner', max_iters=160000)
-checkpoint_config = dict(by_epoch=False, interval=16000)
+checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
 evaluation = dict(interval=16000, metric='mIoU', pre_eval=True)
 fp16 = dict()
 auto_resume = False
