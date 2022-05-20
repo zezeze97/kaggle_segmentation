@@ -23,7 +23,7 @@ class UPerHeadOriginSize(BaseDecodeHead):
         freeze_module [str]: PSP, FPN
     """
 
-    def __init__(self, pool_scales=(1, 2, 3, 6), kernel_size=3, up_scale=2, num_convs=2, freeze_module = [], **kwargs):
+    def __init__(self, pool_scales=(1, 2, 3, 6), kernel_size=3, up_scale=2, num_convs=2, freeze_module=[], **kwargs):
         super(UPerHeadOriginSize, self).__init__(
             input_transform='multiple_select', **kwargs)
         # PSP Module
@@ -95,8 +95,6 @@ class UPerHeadOriginSize(BaseDecodeHead):
                         align_corners=self.align_corners)))
         self.freeze_module = freeze_module
         self._freeze_stages()
-            
-            
 
     def psp_forward(self, inputs):
         """Forward function of PSP module."""
@@ -108,10 +106,17 @@ class UPerHeadOriginSize(BaseDecodeHead):
 
         return output
 
-    def forward(self, inputs):
-        """Forward function."""
-        self._freeze_stages()
+    def _forward_feature(self, inputs):
+        """Forward function for feature maps before classifying each pixel with
+        ``self.cls_seg`` fc.
 
+        Args:
+            inputs (list[Tensor]): List of multi-level img features.
+
+        Returns:
+            feats (Tensor): A tensor of shape (batch_size, self.channels,
+                H, W) which is feature map for last layer of decoder head.
+        """
         inputs = self._transform_inputs(inputs)
 
         # build laterals
@@ -126,7 +131,7 @@ class UPerHeadOriginSize(BaseDecodeHead):
         used_backbone_levels = len(laterals)
         for i in range(used_backbone_levels - 1, 0, -1):
             prev_shape = laterals[i - 1].shape[2:]
-            laterals[i - 1] += resize(
+            laterals[i - 1] = laterals[i - 1] + resize(
                 laterals[i],
                 size=prev_shape,
                 mode='bilinear',
@@ -147,12 +152,16 @@ class UPerHeadOriginSize(BaseDecodeHead):
                 mode='bilinear',
                 align_corners=self.align_corners)
         fpn_outs = torch.cat(fpn_outs, dim=1)
-        output = self.fpn_bottleneck(fpn_outs)
+        feats = self.fpn_bottleneck(fpn_outs)
 
         # upsamlpe to input size
         for up_conv in self.up_convs:
-            output = up_conv(output)
+            feats = up_conv(feats)
+        return feats
 
+    def forward(self, inputs):
+        """Forward function."""
+        output = self._forward_feature(inputs)
         output = self.cls_seg(output)
         return output
 
