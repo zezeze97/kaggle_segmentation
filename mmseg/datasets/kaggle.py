@@ -102,10 +102,13 @@ class Kaggle_Dataset(CustomDataset):
             class_names = self.CLASSES
 
         # summary table
-        ret_metrics_summary = OrderedDict({
-            ret_metric: np.round(np.nanmean(ret_metric_value) * 100, 2)
-            for ret_metric, ret_metric_value in ret_metrics.items()
-        })
+        summary_metrics_dict = {}
+        for ret_metric, ret_metric_value in ret_metrics.items():
+            if ret_metric == 'aAcc':
+                summary_metrics_dict[ret_metric] =  np.round(np.nanmean(ret_metric_value) * 100, 2)
+            else:
+                summary_metrics_dict[ret_metric] =  np.round(np.nanmean(ret_metric_value[1:]) * 100, 2)
+        ret_metrics_summary = OrderedDict(summary_metrics_dict)
 
         # each class table
         ret_metrics.pop('aAcc', None)
