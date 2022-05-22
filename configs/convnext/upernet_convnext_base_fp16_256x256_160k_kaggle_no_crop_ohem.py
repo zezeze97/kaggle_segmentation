@@ -16,8 +16,7 @@ model = dict(
             checkpoint=checkpoint_file,
             prefix='backbone.')),
     decode_head=dict(
-        type='UPerHeadOriginSize',
-        freeze_module=[], # freeze_module [str]: PSP, FPN
+        type='UPerHead',
         in_channels=[128, 256, 512, 1024],
         in_index=[0, 1, 2, 3],
         pool_scales=(1, 2, 3, 6),
@@ -26,8 +25,9 @@ model = dict(
         num_classes=4,
         norm_cfg=norm_cfg,
         align_corners=False,
-        loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+        loss_decode=[dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+                    dict(type='DiceLoss', loss_name='loss_dice', loss_weight=3.0)],
+        sampler=dict(type='OHEMPixelSampler', thresh=0.7, min_kept=100000)),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=512,
@@ -39,12 +39,13 @@ model = dict(
         num_classes=4,
         norm_cfg=norm_cfg,
         align_corners=False,
-        loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
+        loss_decode=[dict(type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4),
+                    dict(type='DiceLoss', loss_name='loss_dice', loss_weight=1.2)],
+        sampler=dict(type='OHEMPixelSampler', thresh=0.7, min_kept=100000)),
     train_cfg=dict(),
     test_cfg=dict(mode='whole'))
 dataset_type = 'Kaggle_Dataset'
-data_root = 'data/kaggle_segmentation_clean_data/'
+data_root = 'data/kaggle_segmentation_data/'
 classes = ['background','large_bowel', 'small_bowel', 'stomach']
 palette = [[0,0,0], [64,64,64],[128,128,128], [255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
@@ -138,8 +139,8 @@ lr_config = dict(
     power=1.0,
     min_lr=0.0,
     by_epoch=False)
-runner = dict(type='IterBasedRunner', max_iters=16000)
-checkpoint_config = dict(by_epoch=False, interval=1600, max_keep_ckpts=1)
-evaluation = dict(interval=1600, metric='mDice', pre_eval=True, save_best='mDice')
+runner = dict(type='IterBasedRunner', max_iters=160000)
+checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
+evaluation = dict(interval=16000, metric='mDice', pre_eval=True)
 fp16 = dict()
 auto_resume = False
