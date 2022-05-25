@@ -140,6 +140,6 @@ lr_config = dict(
     by_epoch=False)
 runner = dict(type='IterBasedRunner', max_iters=160000)
 checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
-evaluation = dict(interval=100, metric='imDice', pre_eval=True, save_best='miDice')
+evaluation = dict(interval=100, metric=['imDice', 'mDice'], pre_eval=True)
 fp16 = dict()
 auto_resume = False
