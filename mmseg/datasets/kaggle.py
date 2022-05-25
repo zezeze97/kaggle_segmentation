@@ -55,7 +55,6 @@ class Kaggle_Dataset(CustomDataset):
                  gt_seg_maps=None,
                  **kwargs):
         """Evaluate the dataset.
-
         Args:
             results (list[tuple[torch.Tensor]] | list[str]): per image pre_eval
                  results or predict segmentation map for computing evaluation
@@ -66,13 +65,12 @@ class Kaggle_Dataset(CustomDataset):
                 related information during evaluation. Default: None.
             gt_seg_maps (generator[ndarray]): Custom gt seg maps as input,
                 used in ConcatDataset
-
         Returns:
             dict[str, float]: Default metrics.
         """
         if isinstance(metric, str):
             metric = [metric]
-        allowed_metrics = ['mIoU', 'mDice', 'mFscore']
+        allowed_metrics = ['mIoU', 'mDice', 'mFscore', 'imDice', 'imIoU', 'imFscore']
         if not set(metric).issubset(set(allowed_metrics)):
             raise KeyError('metric {} is not supported'.format(metric))
 
@@ -89,7 +87,7 @@ class Kaggle_Dataset(CustomDataset):
                 num_classes,
                 self.ignore_index,
                 metric,
-                label_map=dict(),
+                label_map=self.label_map,
                 reduce_zero_label=self.reduce_zero_label)
         # test a list of pre_eval_results
         else:
@@ -102,16 +100,14 @@ class Kaggle_Dataset(CustomDataset):
             class_names = self.CLASSES
 
         # summary table
-        summary_metrics_dict = {}
-        for ret_metric, ret_metric_value in ret_metrics.items():
-            if ret_metric == 'aAcc':
-                summary_metrics_dict[ret_metric] =  np.round(np.nanmean(ret_metric_value) * 100, 2)
-            else:
-                summary_metrics_dict[ret_metric] =  np.round(np.nanmean(ret_metric_value[1:]) * 100, 2)
-        ret_metrics_summary = OrderedDict(summary_metrics_dict)
+        ret_metrics_summary = OrderedDict({
+            ret_metric: np.round(np.nanmean(ret_metric_value) * 100, 2)
+            for ret_metric, ret_metric_value in ret_metrics.items()
+        })
 
         # each class table
         ret_metrics.pop('aAcc', None)
+        ret_metrics.pop('fwIoU', None)
         ret_metrics_class = OrderedDict({
             ret_metric: np.round(ret_metric_value * 100, 2)
             for ret_metric, ret_metric_value in ret_metrics.items()
@@ -128,6 +124,8 @@ class Kaggle_Dataset(CustomDataset):
         for key, val in ret_metrics_summary.items():
             if key == 'aAcc':
                 summary_table_data.add_column(key, [val])
+            elif key == 'fwIoU':
+                summary_table_data.add_column(key, [val])
             else:
                 summary_table_data.add_column('m' + key, [val])
 
@@ -140,6 +138,8 @@ class Kaggle_Dataset(CustomDataset):
         for key, value in ret_metrics_summary.items():
             if key == 'aAcc':
                 eval_results[key] = value / 100.0
+            if key == 'fwIoU':
+                eval_results[key] = value / 100.0
             else:
                 eval_results['m' + key] = value / 100.0
 
@@ -151,6 +151,7 @@ class Kaggle_Dataset(CustomDataset):
             })
 
         return eval_results
+
 
     def pre_eval(self, preds, indices):
         """Collect eval result from each iteration.
