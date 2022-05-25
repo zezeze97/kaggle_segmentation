@@ -45,8 +45,8 @@ model = dict(
     test_cfg=dict(mode='whole',multi_label=True))
 dataset_type = 'Kaggle_Dataset'
 data_root = 'data/kaggle_segmentation_data/'
-classes = ['background','large_bowel', 'small_bowel', 'stomach']
-palette = [[0,0,0], [64,64,64],[128,128,128], [255,255,255]]
+classes = ['large_bowel', 'small_bowel', 'stomach']
+palette = [[64,64,64],[128,128,128],[255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
 crop_size = (256, 256)
 img_scale = (256, 256)
@@ -140,6 +140,6 @@ lr_config = dict(
     by_epoch=False)
 runner = dict(type='IterBasedRunner', max_iters=160000)
 checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
-evaluation = dict(interval=100, metric='mDice', pre_eval=True, save_best='mDice')
+evaluation = dict(interval=1000, metric='mDice', pre_eval=True, save_best='mDice')
 fp16 = dict()
 auto_resume = False
