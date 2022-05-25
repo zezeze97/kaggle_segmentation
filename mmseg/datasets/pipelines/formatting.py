@@ -246,7 +246,10 @@ class DefaultFormatBundle_Multilabel(object):
             results['img'] = DC(to_tensor(img), stack=True)
         if 'gt_semantic_seg' in results:
             # convert to long
-            results['gt_semantic_seg'] = DC(to_tensor(results['gt_semantic_seg'].astype(np.int64).transpose(2, 0, 1)),stack=True)
+            gt_result = results['gt_semantic_seg'].astype(np.int64).transpose(2, 0, 1)
+            gt_result[gt_result == 0] = 1
+            gt_result[gt_result == 255] = 0
+            results['gt_semantic_seg'] = DC(to_tensor(gt_result),stack=True)
         return results
 
     def __repr__(self):
