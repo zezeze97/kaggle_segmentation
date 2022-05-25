@@ -43,4 +43,5 @@ bash run.sh test $GPU
 - 图片case的相关性，更好的建模方式？
 - 2.5d data？
 - 更换backbone, swin transformer
+- mutilabel问题，最后激活使用sigmoid而不是softmax!!
 - 实验结果整理
