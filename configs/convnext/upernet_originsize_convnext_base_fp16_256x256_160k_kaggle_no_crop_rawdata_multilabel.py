@@ -2,7 +2,7 @@ norm_cfg = dict(type='SyncBN', requires_grad=True)
 custom_imports = dict(imports='mmcls.models', allow_failed_imports=False)
 checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-base_3rdparty_32xb128-noema_in1k_20220301-2a0ee547.pth'
 model = dict(
-    type='EncoderDecoder',
+    type='Multi_Label_EncoderDecoder',
     pretrained=None,
     backbone=dict(
         type='mmcls.ConvNeXt',
@@ -23,11 +23,11 @@ model = dict(
         pool_scales=(1, 2, 3, 6),
         channels=512,
         dropout_ratio=0.1,
-        num_classes=4,
+        num_classes=3,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=512,
@@ -36,17 +36,17 @@ model = dict(
         num_convs=1,
         concat_input=False,
         dropout_ratio=0.1,
-        num_classes=4,
+        num_classes=3,
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=False, loss_weight=0.4)),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=0.4)),
     train_cfg=dict(),
-    test_cfg=dict(mode='whole'))
+    test_cfg=dict(mode='whole',multi_label=True))
 dataset_type = 'Kaggle_Dataset'
-data_root = 'data/kaggle_segmentation_clean_data/'
-classes = ['background','large_bowel', 'small_bowel', 'stomach']
-palette = [[0,0,0], [64,64,64],[128,128,128], [255,255,255]]
+data_root = 'data/kaggle_segmentation_data/'
+classes = ['large_bowel', 'small_bowel', 'stomach']
+palette = [[64,64,64],[128,128,128],[255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
 crop_size = (256, 256)
 img_scale = (256, 256)
@@ -57,8 +57,8 @@ train_pipeline = [
     dict(type='RandomFlip', prob=0.5),
     dict(type='PhotoMetricDistortion'),
     dict(type='Normalize', **img_norm_cfg),
-    dict(type='Pad', size=img_scale, pad_val=0, seg_pad_val=255),
-    dict(type='DefaultFormatBundle'),
+    # dict(type='Pad', size=img_scale, pad_val=0, seg_pad_val=255),
+    dict(type='DefaultFormatBundle_Multilabel'),
     dict(type='Collect', keys=['img', 'gt_semantic_seg'])
 ]
 test_pipeline = [
@@ -82,7 +82,7 @@ data = dict(
         type=dataset_type,
         data_root=data_root,
         img_dir='image',
-        ann_dir='label',
+        ann_dir='label_3channel_convert',
         img_suffix=".png",
         seg_map_suffix='.png',
         split="splits/train.txt",
@@ -93,7 +93,7 @@ data = dict(
         type=dataset_type,
         data_root=data_root,
         img_dir='image',
-        ann_dir='label',
+        ann_dir='label_3channel_convert',
         img_suffix=".png",
         seg_map_suffix='.png',
         split="splits/val.txt",
@@ -138,8 +138,8 @@ lr_config = dict(
     power=1.0,
     min_lr=0.0,
     by_epoch=False)
-runner = dict(type='IterBasedRunner', max_iters=16000)
-checkpoint_config = dict(by_epoch=False, interval=1600, max_keep_ckpts=1)
-evaluation = dict(interval=100, metric='mDice', pre_eval=True, save_best='mDice')
+runner = dict(type='IterBasedRunner', max_iters=160000)
+checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
+evaluation = dict(interval=16000, metric='mDice', pre_eval=True, save_best='mDice')
 fp16 = dict()
 auto_resume = False
