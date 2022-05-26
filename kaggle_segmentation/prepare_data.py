@@ -48,7 +48,9 @@ def convert_mask(src_mask_path, target_mask_path):
     all_mask_list = os.listdir(src_mask_path)
     for mask_name in all_mask_list:
         mask = cv2.imread(os.path.join(src_mask_path, mask_name), cv2.IMREAD_UNCHANGED)
-        cv2.imwrite(os.path.join(target_mask_path,mask_name),mask + 1)
+        mask = mask + 1
+        print(np.unique(mask))
+        cv2.imwrite(os.path.join(target_mask_path,mask_name),mask)
         
         
 
