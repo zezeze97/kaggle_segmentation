@@ -96,7 +96,7 @@ data = dict(
         ann_dir='label_3channel_convert',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/debug_val.txt",
+        split="splits/val.txt",
         classes=classes,
         palette=palette,
         pipeline=test_pipeline),
@@ -139,7 +139,7 @@ lr_config = dict(
     min_lr=0.0,
     by_epoch=False)
 runner = dict(type='IterBasedRunner', max_iters=160000)
-checkpoint_config = dict(by_epoch=False, interval=1000, max_keep_ckpts=1)
-evaluation = dict(interval=100, metric='mDice', pre_eval=True, save_best='mDice')
+checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
+evaluation = dict(interval=16000, metric='mDice', pre_eval=True, save_best='mDice')
 fp16 = dict()
 auto_resume = False
