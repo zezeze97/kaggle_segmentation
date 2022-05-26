@@ -63,7 +63,7 @@ def accuracy(pred, target, topk=1, thresh=None, ignore_index=None):
         assert pred.shape == target.shape
         assert maxk == 1
         correct = ((target == 1) & (pred.sigmoid().round() == 1)).reshape(-1).float().sum(0, keepdim=True)
-        return correct.mul_(100.0 / target.numel())
+        return correct.mul_(100.0 / target.sum())
 
 
 class Accuracy(nn.Module):
