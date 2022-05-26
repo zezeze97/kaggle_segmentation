@@ -41,6 +41,7 @@ class Multi_Label_EncoderDecoder(BaseSegmentor):
 
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
+        self.sigmoid_act = nn.Sigmoid()
 
         assert self.with_decode_head
 
@@ -239,7 +240,7 @@ class Multi_Label_EncoderDecoder(BaseSegmentor):
             seg_logit = self.slide_inference(img, img_meta, rescale)
         else:
             seg_logit = self.whole_inference(img, img_meta, rescale)
-        output = F.sigmoid(seg_logit) # use sigmoid activate for multi label!!!
+        output = self.sigmoid_act(seg_logit) # use sigmoid activate for multi label!!!
         flip = img_meta[0]['flip']
         if flip:
             flip_direction = img_meta[0]['flip_direction']
