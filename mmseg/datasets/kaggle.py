@@ -17,9 +17,9 @@ from mmcv.utils import print_log
 class Kaggle_Dataset(CustomDataset):
     """Kaggle_Dataset.
     """
-    CLASSES = ('background','large_bowel', 'small_bowel', 'stomach')
+    CLASSES = ('large_bowel', 'small_bowel', 'stomach')
 
-    PALETTE = [[0,0,0],[64,64,64],[128,128,128], [255,255,255]]
+    PALETTE = [[64,64,64],[128,128,128], [255,255,255]]
 
     def __init__(self, **kwargs):
         super(Kaggle_Dataset, self).__init__(
