@@ -62,9 +62,11 @@ def accuracy(pred, target, topk=1, thresh=None, ignore_index=None):
     else:
         assert pred.shape == target.shape
         assert maxk == 1
-        correct = ((target == 1) & (pred.sigmoid().round() == 1)).reshape(-1).float().sum(0, keepdim=True)
+        pred = pred.sigmoid().round()
+        # correct = ((target == 1) & (pred == 1)).reshape(-1).float().sum(0, keepdim=True)
+        correct = (pred==target).reshape(-1).float().sum(0, keepdim=True)
         eps = torch.finfo(torch.float32).eps
-        total_num = target[target == 1].numel() + eps
+        total_num = target.numel() + eps
         return correct.mul_(100.0 / total_num)
 
 
