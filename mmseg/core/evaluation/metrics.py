@@ -70,19 +70,23 @@ def intersect_and_union(pred_label,
         label[label == 0] = 255
         label = label - 1
         label[label == 254] = 255
-
-    mask = (label != ignore_index)
-    pred_label = pred_label[mask]
-    label = label[mask]
-
-    intersect = pred_label[pred_label == label]
-    area_intersect = torch.histc(
-        intersect.float(), bins=(num_classes), min=0, max=num_classes - 1)
-    area_pred_label = torch.histc(
-        pred_label.float(), bins=(num_classes), min=0, max=num_classes - 1)
-    area_label = torch.histc(
-        label.float(), bins=(num_classes), min=0, max=num_classes - 1)
-    area_union = area_pred_label + area_label - area_intersect
+    area_intersect = []; area_union = []; area_pred_label = []; area_label = []
+    for i in range(num_classes):
+        class_pred_label = pred_label[:,:,i]
+        class_label = label[:,:,i]
+        intersect = class_pred_label[class_pred_label == class_label]
+        class_area_intersect = intersect.sum()
+        class_area_pred_label =class_pred_label.sum()
+        class_area_label = class_label.sum()
+        class_area_union = class_area_pred_label + class_area_label - class_area_intersect
+        area_intersect.append(class_area_intersect)
+        area_union.append(class_area_union)
+        area_pred_label.append(class_area_pred_label)
+        area_label.append(class_area_label)
+    area_intersect = torch.FloatTensor(area_intersect)
+    area_union = torch.FloatTensor(area_union)
+    area_pred_label = torch.FloatTensor(area_pred_label)
+    area_label = torch.FloatTensor(area_label)
     return area_intersect, area_union, area_pred_label, area_label
 
 
@@ -112,19 +116,19 @@ def total_intersect_and_union(results,
          ndarray: The prediction histogram on all classes.
          ndarray: The ground truth histogram on all classes.
     """
-    total_area_intersect = []
-    total_area_union = []
-    total_area_pred_label = []
-    total_area_label = []
+    total_area_intersect = torch.zeros((num_classes, ), dtype=torch.float64)
+    total_area_union = torch.zeros((num_classes, ), dtype=torch.float64)
+    total_area_pred_label = torch.zeros((num_classes, ), dtype=torch.float64)
+    total_area_label = torch.zeros((num_classes, ), dtype=torch.float64)
     for result, gt_seg_map in zip(results, gt_seg_maps):
         area_intersect, area_union, area_pred_label, area_label = \
             intersect_and_union(
                 result, gt_seg_map, num_classes, ignore_index,
                 label_map, reduce_zero_label)
-        total_area_intersect.append(area_intersect)
-        total_area_union.append(area_union)
-        total_area_pred_label.append(area_pred_label)
-        total_area_label.append(area_label)
+        total_area_intersect += area_intersect
+        total_area_union += area_union
+        total_area_pred_label += area_pred_label
+        total_area_label += area_label
     return total_area_intersect, total_area_union, total_area_pred_label, \
         total_area_label
 
@@ -317,10 +321,10 @@ def pre_eval_to_metrics(pre_eval_results,
     pre_eval_results = tuple(zip(*pre_eval_results))
     assert len(pre_eval_results) == 4
 
-    total_area_intersect = pre_eval_results[0]
-    total_area_union = pre_eval_results[1]
-    total_area_pred_label = pre_eval_results[2]
-    total_area_label = pre_eval_results[3]
+    total_area_intersect = sum(pre_eval_results[0])
+    total_area_union = sum(pre_eval_results[1])
+    total_area_pred_label = sum(pre_eval_results[2])
+    total_area_label = sum(pre_eval_results[3])
 
     ret_metrics = total_area_to_metrics(total_area_intersect, total_area_union,
                                         total_area_pred_label,
@@ -356,24 +360,12 @@ def total_area_to_metrics(total_area_intersect,
     """
     if isinstance(metrics, str):
         metrics = [metrics]
-    allowed_mean_metrics = ['mIoU', 'mDice', 'mFscore']
-    allowed_image_metrics = ['imIoU', 'imDice', 'imFscore']
-    if not set(metrics).issubset(set(allowed_mean_metrics) | set(allowed_image_metrics)):
+    allowed_metrics = ['mIoU', 'mDice', 'mFscore']
+    if not set(metrics).issubset(set(allowed_metrics)):
         raise KeyError('metrics {} is not supported'.format(metrics))
 
-    image_area_intersect = torch.stack(total_area_intersect)
-    image_area_union = torch.stack(total_area_union)
-    image_area_pred_label = torch.stack(total_area_pred_label)
-    image_area_label = torch.stack(total_area_label)
-    total_area_intersect = sum(total_area_intersect)
-    total_area_union = sum(total_area_union)
-    total_area_pred_label = sum(total_area_pred_label)
-    total_area_label = sum(total_area_label)
-
-
     all_acc = total_area_intersect.sum() / total_area_label.sum()
-    fw_iou = (total_area_intersect / (total_area_union + 1) * total_area_label).sum() / total_area_label.sum()
-    ret_metrics = OrderedDict({'aAcc': all_acc, 'fwIoU': fw_iou})
+    ret_metrics = OrderedDict({'aAcc': all_acc})
     for metric in metrics:
         if metric == 'mIoU':
             iou = total_area_intersect / total_area_union
@@ -394,26 +386,6 @@ def total_area_to_metrics(total_area_intersect,
             ret_metrics['Fscore'] = f_value
             ret_metrics['Precision'] = precision
             ret_metrics['Recall'] = recall
-        elif metric == 'imIoU':
-            iou = (image_area_intersect / (image_area_union + 1) + (image_area_union == 0).long()).mean(0)
-            acc = total_area_intersect / total_area_label
-            ret_metrics['IoU'] = iou
-            ret_metrics['Acc'] = acc
-        elif metric == 'imDice':
-            dice = (2 * image_area_intersect / (
-                image_area_pred_label + image_area_label + 1) + (image_area_union == 0).long()).mean(0)
-            acc = total_area_intersect / total_area_label
-            ret_metrics['iDice'] = dice
-            ret_metrics['Acc'] = acc
-        elif metric == 'imFscore':
-            precision = (image_area_intersect / (image_area_pred_label + 1) + (image_area_union == 0).long()).mean(0)
-            recall = (image_area_intersect / image_area_label + (image_area_label == 0).long()).mean(0)
-            f_value = torch.tensor(
-                [f_score(x[0], x[1], beta) for x in zip(precision, recall)])
-            ret_metrics['Fscore'] = f_value
-            ret_metrics['Precision'] = precision
-            ret_metrics['Recall'] = recall
-
 
     ret_metrics = {
         metric: value.numpy()

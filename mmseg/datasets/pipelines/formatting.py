@@ -247,7 +247,6 @@ class DefaultFormatBundle_Multilabel(object):
         if 'gt_semantic_seg' in results:
             # convert to long
             gt_result = results['gt_semantic_seg'].astype(np.int64).transpose(2, 0, 1)
-            gt_result[gt_result == 255] = 1
             results['gt_semantic_seg'] = DC(to_tensor(gt_result),stack=True)
         return results
 
