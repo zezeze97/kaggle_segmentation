@@ -64,11 +64,27 @@ def data_split(full_list, ratio, shuffle=False):
     sublist_2 = full_list[offset:]
     return sublist_1, sublist_2
 
+def compute_bce_class_weight(mask_path, num_class):
+    mask_name_list = os.listdir(mask_path)
+    pos_total = np.zeros(num_class)
+    neg_total = np.zeros(num_class)
+    for mask_name in mask_name_list:
+        mask = cv2.imread(os.path.join(mask_path, mask_name), cv2.IMREAD_UNCHANGED)
+        for i in range(num_class):
+            msk = mask[:,:,i]
+            pos = msk.sum()
+            neg_msk = (1 - msk)
+            neg = neg_msk.sum()
+            pos_total[i] += pos
+            neg_total[i] += neg
+    return neg_total/pos_total
+
+
 
 if __name__ == '__main__':
-    src_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_3channel'
-    target_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_3channel_convert'
-    convert_mask(src_mask_path, target_mask_path)
+    mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_3channel_convert'
+    class_weight = compute_bce_class_weight(mask_path, num_class=3)
+    print(class_weight)
 
     
     
