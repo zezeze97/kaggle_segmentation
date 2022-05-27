@@ -12,7 +12,7 @@ GPU=$2
 #config=upernet_swin_base_patch4_window7_256x256_160k_kaggle_pretrain_224x224_22K
 #config=upernet_convnext_base_fp16_256x256_160k_kaggle_no_crop_ohem
 #config=upernet_originsize_convnext_base_fp16_512x512_160k_kaggle_no_crop_rawdata
-config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_no_crop_rawdata_multilabel
+config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_no_crop_rawdata_multilabel_non_empty
 
 
 if [ $1 = "train" ]; then

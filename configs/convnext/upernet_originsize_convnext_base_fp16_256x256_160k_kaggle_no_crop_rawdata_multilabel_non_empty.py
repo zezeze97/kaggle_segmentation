@@ -27,7 +27,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0, class_weight=[144.29242716,157.69988021,285.53359321])),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=512,
@@ -40,7 +40,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=0.4,class_weight=[144.29242716,157.69988021,285.53359321])),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=0.4)),
     train_cfg=dict(),
     test_cfg=dict(mode='whole',multi_label=True))
 dataset_type = 'Kaggle_Dataset'
@@ -85,7 +85,7 @@ data = dict(
         ann_dir='label_3channel_convert',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/train.txt",
+        split="splits/non_empty_train.txt",
         classes=classes,
         palette=palette,
         pipeline=train_pipeline),
@@ -96,7 +96,7 @@ data = dict(
         ann_dir='label_3channel_convert',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/val.txt",
+        split="splits/non_empty_val.txt",
         classes=classes,
         palette=palette,
         pipeline=test_pipeline),
@@ -138,8 +138,8 @@ lr_config = dict(
     power=1.0,
     min_lr=0.0,
     by_epoch=False)
-runner = dict(type='IterBasedRunner', max_iters=16000)
-checkpoint_config = dict(by_epoch=False, interval=1600, max_keep_ckpts=1)
-evaluation = dict(interval=1600, metric='mDice', pre_eval=True, save_best='mDice')
+runner = dict(type='IterBasedRunner', max_iters=160000)
+checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
+evaluation = dict(interval=16000, metric='mDice', pre_eval=True, save_best='mDice')
 fp16 = dict()
 auto_resume = False

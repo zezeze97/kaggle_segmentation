@@ -32,17 +32,15 @@ def move(src_root_path, target_root_path):
             print('Error loading: ', img_path)
        
 
-def clean_data(src_img_root_path, src_label_root_path, target_root_path):
-    all_file_list = list_allfile(src_img_root_path)
-    for img_path in all_file_list:
-        img_name = img_path.split('/')[-1]
-        mask = cv2.imread(os.path.join(src_label_root_path, img_name), cv2.IMREAD_UNCHANGED)
-        if len(np.unique(mask)) > 1:
-            if cv2.imread(os.path.join(src_img_root_path, img_name)) is not None:
-                shutil.copy(os.path.join(src_label_root_path, img_name), os.path.join(target_root_path, 'label',img_name))
-                shutil.copy(os.path.join(src_img_root_path, img_name), os.path.join(target_root_path, 'image', img_name))
-            else:
-                print('error loading', os.path.join(src_img_root_path, img_name))
+def find_non_empty_data(mask_path):
+    mask_list = os.listdir(mask_path)
+    non_empty_list = []
+    for mask_name in mask_list:
+        msk = cv2.imread(os.path.join(mask_path, mask_name), cv2.IMREAD_UNCHANGED)
+        if len(np.unique(msk)) > 1:
+            non_empty_list.append(mask_name.split('.')[0])
+    return non_empty_list
+
 
 def convert_mask(src_mask_path, target_mask_path):
     all_mask_list = os.listdir(src_mask_path)
@@ -83,8 +81,10 @@ def compute_bce_class_weight(mask_path, num_class):
 
 if __name__ == '__main__':
     mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_3channel_convert'
-    class_weight = compute_bce_class_weight(mask_path, num_class=3)
-    print(class_weight)
+    non_empty_list = find_non_empty_data(mask_path)
+    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/splits/non_empty.txt', 'w') as f:
+        for item in non_empty_list:
+            f.write(item + '\n')
 
     
     
