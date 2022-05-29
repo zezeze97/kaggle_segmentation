@@ -46,8 +46,27 @@ def convert_mask(src_mask_path, target_mask_path):
     all_mask_list = os.listdir(src_mask_path)
     for mask_name in all_mask_list:
         mask = cv2.imread(os.path.join(src_mask_path, mask_name), cv2.IMREAD_UNCHANGED)
-        mask[mask==255] = 1
-        cv2.imwrite(os.path.join(target_mask_path,mask_name),mask)
+        w = mask.shape[0];h = mask.shape[1]
+        convert_mask = np.zeros((w, h))
+        for i in range(w):
+            for j in range(h):
+                if (mask[i,j,:] == [1,0,0]).all():
+                    convert_mask[i,j] = 1
+                if (mask[i,j,:] == [0,1,0]).all():
+                    convert_mask[i,j] = 2
+                if (mask[i,j,:] == [0,0,1]).all():
+                    convert_mask[i,j] = 3
+                if (mask[i,j,:] == [1,1,0]).all():
+                    convert_mask[i,j] = 4
+                if (mask[i,j,:] == [1,0,1]).all():
+                    convert_mask[i,j] = 5
+                if (mask[i,j,:] == [0,1,1]).all():
+                    convert_mask[i,j] = 6
+                if (mask[i,j,:] == [1,1,1]).all():
+                    convert_mask[i,j] = 7
+        convert_mask = convert_mask.astype(np.uint8)
+        print(np.unique(convert_mask))
+        cv2.imwrite(os.path.join(target_mask_path,mask_name),convert_mask)
         
         
 
@@ -80,11 +99,10 @@ def compute_bce_class_weight(mask_path, num_class):
 
 
 if __name__ == '__main__':
-    mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_3channel_convert'
-    non_empty_list = find_non_empty_data(mask_path)
-    with open('/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/splits/non_empty.txt', 'w') as f:
-        for item in non_empty_list:
-            f.write(item + '\n')
+    src_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_3channel_convert'
+    target_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_1channel_overlap'
+    convert_mask(src_mask_path, target_mask_path)
+    
 
     
     
