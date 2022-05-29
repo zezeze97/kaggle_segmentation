@@ -4,6 +4,7 @@ import shutil
 import cv2
 import numpy as np
 import random
+from tqdm import tqdm
 
 def list_allfile(path,all_files=[]):    
     if os.path.exists(path):
@@ -44,29 +45,21 @@ def find_non_empty_data(mask_path):
 
 def convert_mask(src_mask_path, target_mask_path):
     all_mask_list = os.listdir(src_mask_path)
-    for mask_name in all_mask_list:
-        mask = cv2.imread(os.path.join(src_mask_path, mask_name), cv2.IMREAD_UNCHANGED)
-        w = mask.shape[0];h = mask.shape[1]
-        convert_mask = np.zeros((w, h))
-        for i in range(w):
-            for j in range(h):
-                if (mask[i,j,:] == [1,0,0]).all():
-                    convert_mask[i,j] = 1
-                if (mask[i,j,:] == [0,1,0]).all():
-                    convert_mask[i,j] = 2
-                if (mask[i,j,:] == [0,0,1]).all():
-                    convert_mask[i,j] = 3
-                if (mask[i,j,:] == [1,1,0]).all():
-                    convert_mask[i,j] = 4
-                if (mask[i,j,:] == [1,0,1]).all():
-                    convert_mask[i,j] = 5
-                if (mask[i,j,:] == [0,1,1]).all():
-                    convert_mask[i,j] = 6
-                if (mask[i,j,:] == [1,1,1]).all():
-                    convert_mask[i,j] = 7
-        convert_mask = convert_mask.astype(np.uint8)
-        print(np.unique(convert_mask))
-        cv2.imwrite(os.path.join(target_mask_path,mask_name),convert_mask)
+    for mask_name in tqdm(all_mask_list):
+        msk =np.load(os.path.join(src_mask_path, mask_name)).astype('float32')
+        msk/=255.0
+        msk = msk.astype(np.uint8)
+        save_path = os.path.join(target_mask_path, mask_name.split('.')[0] + '.png')
+        cv2.imwrite(save_path, msk)
+
+def convert_img(src_img_path, target_img_path):
+    all_img_list = os.listdir(src_img_path)
+    for img_name in tqdm(all_img_list):
+        img = np.load(os.path.join(src_img_path, img_name))
+        img = (img - img.min())/(img.max() - img.min())*255.0 # scale image to [0, 255]
+        img = img.astype('uint8') # uint16 -> uint8
+        save_path = os.path.join(target_img_path, img_name.split('.')[0] + '.png')
+        cv2.imwrite(save_path, img)
         
         
 
@@ -99,9 +92,10 @@ def compute_bce_class_weight(mask_path, num_class):
 
 
 if __name__ == '__main__':
-    src_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_3channel_convert'
-    target_mask_path = '/home/zhangzr/mmsegmentation_kaggle/data/kaggle_segmentation_data/label_1channel_overlap'
+    src_mask_path = 'data/2_5d_seg_data/masks_np'
+    target_mask_path = 'data/2_5d_seg_data/masks'
     convert_mask(src_mask_path, target_mask_path)
+    
     
 
     
