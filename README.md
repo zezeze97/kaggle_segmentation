@@ -4,6 +4,8 @@
 
 # 数据集
 
+[数据预处理:2.5d data](kaggle_segmentation/prepare_data.ipynb)
+
 [预处理数据集下载](https://disk.pku.edu.cn:443/link/AD1513240B13764DC6A0DA6E30335701)
 
 # 数据集探索

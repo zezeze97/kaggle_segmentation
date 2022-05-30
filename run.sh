@@ -15,7 +15,7 @@ GPU=$2
 #config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_no_crop_rawdata_multilabel_non_empty
 #config=upernet_originsize_convnext_base_fp16_256x256_16k_kaggle_no_crop_rawdata_multilabel_non_empty
 #config=upernet_originsize_convnext_base_fp16_512x512_160k_kaggle_multilabel
-config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_25d_multilabel
+config=upernet_originsize_convnext_base_fp16_256x256_16k_kaggle_25d_multilabel
 if [ $1 = "train" ]; then
     CUDA_VISIBLE_DEVICES=$GPU PORT=23470 ./tools/dist_train.sh configs/convnext/${config}.py 1 --work-dir cache/${config} 
     #CUDA_VISIBLE_DEVICES=$GPU PORT=23473 ./tools/dist_train.sh configs/swin/${config}.py 1 --work-dir cache/${config} 
