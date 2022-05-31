@@ -44,14 +44,14 @@ model = dict(
     train_cfg=dict(),
     test_cfg=dict(mode='whole',multi_label=True))
 dataset_type = 'Kaggle_Dataset'
-data_root = 'data/mmseg_train_25d_new/'
+data_root = 'data/2_5d_seg_data/'
 classes = ['large_bowel', 'small_bowel', 'stomach']
 palette = [[64,64,64],[128,128,128],[255,255,255]]
 img_norm_cfg = dict(mean=[0,0,0], std=[1,1,1], to_rgb=True)
 crop_size = (256, 256)
 img_scale = (256, 256)
 train_pipeline = [
-    dict(type='LoadImageFromFile', to_float32=False, color_type='unchanged', force_uint8=True, force_3channel=False),
+    dict(type='LoadImageFromFile', to_float32=False, color_type='unchanged', force_uint8=False, force_3channel=False),
     dict(type='LoadAnnotations',reduce_zero_label=False),
     dict(type='Resize', img_scale=img_scale, keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
@@ -62,7 +62,7 @@ train_pipeline = [
     dict(type='Collect', keys=['img', 'gt_semantic_seg'])
 ]
 test_pipeline = [
-    dict(type='LoadImageFromFile', to_float32=False, color_type='unchanged', force_uint8=True, force_3channel=False),
+    dict(type='LoadImageFromFile', to_float32=False, color_type='unchanged', force_uint8=False, force_3channel=False),
     dict(
         type='MultiScaleFlipAug',
         img_scale=img_scale,
@@ -82,10 +82,10 @@ data = dict(
         type=dataset_type,
         data_root=data_root,
         img_dir='images',
-        ann_dir='labels',
+        ann_dir='masks',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/fold_0.txt",
+        split="splits/train_fold_0.txt",
         classes=classes,
         palette=palette,
         pipeline=train_pipeline),
@@ -93,10 +93,10 @@ data = dict(
         type=dataset_type,
         data_root=data_root,
         img_dir='images',
-        ann_dir='labels',
+        ann_dir='masks',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/holdout_0.txt",
+        split="splits/val_fold_0.txt",
         classes=classes,
         palette=palette,
         pipeline=test_pipeline),
@@ -106,10 +106,10 @@ data = dict(
         data_root=data_root,
         test_mode=True,
         # img_dir='test/images',
-        img_dir='image',
+        img_dir='images',
         img_suffix=".png",
         seg_map_suffix='.png',
-        split="splits/val.txt",
+        split="splits/val_fold_0.txt",
         classes=classes,
         palette=palette,
         pipeline=test_pipeline))

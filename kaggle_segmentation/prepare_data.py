@@ -5,6 +5,9 @@ import cv2
 import numpy as np
 import random
 from tqdm import tqdm
+# Sklearn
+from sklearn.model_selection import StratifiedKFold, KFold, StratifiedGroupKFold
+import pandas as pd
 
 def list_allfile(path,all_files=[]):    
     if os.path.exists(path):
@@ -89,14 +92,65 @@ def compute_bce_class_weight(mask_path, num_class):
             neg_total[i] += neg
     return neg_total/pos_total
 
+def convert_split(src_split_list):
+    convert_name_list = []
+    for img_name in src_split_list:
+        img_name_list = img_name.split('_')
+        new_name = img_name_list[0] + '_' + img_name_list[1] + '_' + 'slice_' + img_name_list[2].zfill(5)
+        convert_name_list.append(new_name)
+    return convert_name_list
+
+
+
+def split_data_new(df):
+    skf = StratifiedGroupKFold(n_splits=5, shuffle=True)
+    for fold, (train_idx, val_idx) in enumerate(skf.split(df, df['empty'], groups = df["case"])):
+        df.loc[val_idx, 'fold'] = fold
+    fold_0 = df[df['fold']==0]
+    fold_1 = df[df['fold']==1]
+    fold_2 = df[df['fold']==2]
+    fold_3 = df[df['fold']==3]
+    fold_4 = df[df['fold']==4]
+    fold_0_list = [];fold_1_list = [];fold_2_list = [];fold_3_list = [];fold_4_list = []
+    for index,row in fold_0.iterrows():
+        fold_0_list.append(row['id'])
+    for index,row in fold_1.iterrows():
+        fold_1_list.append(row['id'])
+    for index,row in fold_2.iterrows():
+        fold_2_list.append(row['id'])
+    for index,row in fold_3.iterrows():
+        fold_3_list.append(row['id'])
+    for index,row in fold_4.iterrows():
+        fold_4_list.append(row['id'])
+
+
+    return fold_0_list, fold_1_list, fold_2_list, fold_3_list, fold_4_list
+
 
 
 if __name__ == '__main__':
-    src_mask_path = 'data/2_5d_seg_data/masks_np'
-    target_mask_path = 'data/2_5d_seg_data/masks'
-    convert_mask(src_mask_path, target_mask_path)
+    df = pd.read_csv('/home/zhangzr/mmsegmentation_kaggle/data/2_5d_seg_data/train.csv')
+    fold_0_list, fold_1_list, fold_2_list, fold_3_list, fold_4_list = split_data_new(df)
+    train_fold_0 = fold_1_list + fold_2_list + fold_3_list + fold_4_list
+    val_fold_0 = fold_0_list
+    train_fold_1 = fold_0_list + fold_2_list + fold_3_list + fold_4_list
+    val_fold_1 = fold_1_list
+    train_fold_2 = fold_0_list + fold_1_list + fold_3_list + fold_4_list
+    val_fold_2 = fold_2_list
+    train_fold_3 = fold_1_list + fold_2_list + fold_0_list + fold_4_list
+    val_fold_3 = fold_3_list
+    train_fold_4 = fold_1_list + fold_2_list + fold_3_list + fold_0_list
+    val_fold_4 = fold_4_list
+    with open('/home/zhangzr/mmsegmentation_kaggle/data/2_5d_seg_data/splits/train_fold_0.txt', 'w') as f:
+        for item in train_fold_0:
+            f.write(item + '\n')
+    with open('/home/zhangzr/mmsegmentation_kaggle/data/2_5d_seg_data/splits/val_fold_0.txt', 'w') as f:
+        for item in val_fold_0:
+            f.write(item + '\n')
+
+
     
-    
+
 
     
     
