@@ -1109,6 +1109,8 @@ class RandomMosaic(object):
             output. Default: (0.5, 1.5).
         pad_val (int): Pad value. Default: 0.
         seg_pad_val (int): Pad value of segmentation map. Default: 255.
+        multilabel(bool): Whether to use multilabel segmentation task. Default: False
+        num_class(int): num class of seg if use multi-label
     """
 
     def __init__(self,
@@ -1116,7 +1118,9 @@ class RandomMosaic(object):
                  img_scale=(640, 640),
                  center_ratio_range=(0.5, 1.5),
                  pad_val=0,
-                 seg_pad_val=255):
+                 seg_pad_val=255,
+                 multilabel=False,
+                 num_class=3):
         assert 0 <= prob and prob <= 1
         assert isinstance(img_scale, tuple)
         self.prob = prob
@@ -1124,6 +1128,8 @@ class RandomMosaic(object):
         self.center_ratio_range = center_ratio_range
         self.pad_val = pad_val
         self.seg_pad_val = seg_pad_val
+        self.multilabel = multilabel
+        self.num_class = num_class
 
     def __call__(self, results):
         """Call function to make a mosaic of image.
@@ -1137,7 +1143,10 @@ class RandomMosaic(object):
         mosaic = True if np.random.rand() < self.prob else False
         if mosaic:
             results = self._mosaic_transform_img(results)
-            results = self._mosaic_transform_seg(results)
+            if self.multilabel:
+                results = self._mosaic_transform_multilabel_seg(results)
+            else:
+                results = self._mosaic_transform_seg(results)
         return results
 
     def get_indexes(self, dataset):
@@ -1262,6 +1271,57 @@ class RandomMosaic(object):
             results[key] = mosaic_seg
 
         return results
+    def _mosaic_transform_multilabel_seg(self, results):
+        """Mosaic transform function for label annotations.
+
+        Args:
+            results (dict): Result dict.
+
+        Returns:
+            dict: Updated result dict.
+        """
+
+        assert 'mix_results' in results
+        for key in results.get('seg_fields', []):
+            mosaic_seg = np.full(
+                (int(self.img_scale[0] * 2), int(self.img_scale[1] * 2), self.num_class),
+                self.seg_pad_val,
+                dtype=results[key].dtype)
+
+            # mosaic center x, y
+            center_position = (self.center_x, self.center_y)
+
+            loc_strs = ('top_left', 'top_right', 'bottom_left', 'bottom_right')
+            for i, loc in enumerate(loc_strs):
+                if loc == 'top_left':
+                    result_patch = copy.deepcopy(results)
+                else:
+                    result_patch = copy.deepcopy(results['mix_results'][i - 1])
+
+                gt_seg_i = result_patch[key]
+                h_i, w_i = gt_seg_i.shape[:2]
+                # keep_ratio resize
+                scale_ratio_i = min(self.img_scale[0] / h_i,
+                                    self.img_scale[1] / w_i)
+                gt_seg_i = mmcv.imresize(
+                    gt_seg_i,
+                    (int(w_i * scale_ratio_i), int(h_i * scale_ratio_i)),
+                    interpolation='nearest')
+
+                # compute the combine parameters
+                paste_coord, crop_coord = self._mosaic_combine(
+                    loc, center_position, gt_seg_i.shape[:2][::-1])
+                x1_p, y1_p, x2_p, y2_p = paste_coord
+                x1_c, y1_c, x2_c, y2_c = crop_coord
+
+                # crop and paste image
+                mosaic_seg[y1_p:y2_p, x1_p:x2_p, :] = gt_seg_i[y1_c:y2_c,
+                                                            x1_c:x2_c, :]
+
+            results[key] = mosaic_seg
+
+        return results
+    
 
     def _mosaic_combine(self, loc, center_position_xy, img_shape_wh):
         """Calculate global coordinate of mosaic image and local coordinate of
