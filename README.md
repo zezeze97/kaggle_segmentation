@@ -40,10 +40,11 @@ bash run.sh test $GPU
 
 # TODO
 
-- 图片尺寸较小, 可以尝试upernet origin size?(默认1/4大小)
+- 图片尺寸较小, 可以尝试upernet origin size?(默认1/4大小) 
 - train pipline去除random crop
 - 图片case的相关性，更好的建模方式？
 - 2.5d data？
 - 更换backbone, swin transformer
 - mutilabel问题，最后激活使用sigmoid而不是softmax!!
 - 实验结果整理
+- EfficientNet + Unet?  (他山之石)
