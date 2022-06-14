@@ -2,11 +2,7 @@
 
 该仓库用于[UW-Madison GI Tract Image Segmentation](https://www.kaggle.com/competitions/uw-madison-gi-tract-image-segmentation/overview)比赛
 
-# 数据集
 
-[数据预处理:2.5d data](kaggle_segmentation/prepare_data.ipynb)
-
-[预处理数据集下载](https://disk.pku.edu.cn:443/link/AD1513240B13764DC6A0DA6E30335701)
 
 # 数据集探索
 
@@ -24,6 +20,10 @@ git clone https://github.com/zezeze97/kaggle_segmentation.git
 cd {path of project}
 pip install -e .  
 ```
+# 数据集下载，预处理
+
+从官网下载好数据集后，放在该项目的input目录下，运行[kaggle_segmentation/prepare_data.ipynb](kaggle_segmentation/prepare_data.ipynb)
+
 
 # 训练，测试
 
