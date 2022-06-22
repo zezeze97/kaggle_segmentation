@@ -22,7 +22,8 @@ GPU=$2
 # config=upernet_originsize_convnext_base_fp16_512x512_160k_kaggle_25d_multilabel_carno_rotate
 # config=upernet_originsize_convnext_base_fp16_768x768_160k_kaggle_25d_multilabel_carno_rotate
 # config=upernet_originsize_convnext_large_fp16_384x384_160k_kaggle_25d_multilabel_carno_rotate
-config=upernet_originsize_convnext_large_fp16_384x384_160k_kaggle_25d_multilabel_carno
+# config=upernet_originsize_convnext_large_fp16_384x384_160k_kaggle_25d_multilabel_carno
+config=upernet_originsize_convnext_base_fp16_384x384_160k_kaggle_25d_multilabel_carno_mosaic
 
 if [ $1 = "train" ]; then
     CUDA_VISIBLE_DEVICES=$GPU PORT=23471 ./tools/dist_train.sh configs/convnext/${config}.py 2 --work-dir cache/${config} 
