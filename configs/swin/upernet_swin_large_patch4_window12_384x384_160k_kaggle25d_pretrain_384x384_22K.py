@@ -1,5 +1,6 @@
 norm_cfg = dict(type='SyncBN', requires_grad=True)
 backbone_norm_cfg = dict(type='LN', requires_grad=True)
+checkpoint_file = 'https://download.openmmlab.com/mmsegmentation/v0.5/pretrain/swin/swin_large_patch4_window12_384_22k_20220412-6580f57d.pth'  # noqa
 model = dict(
     type='Multi_Label_EncoderDecoder',
     pretrained=None,
@@ -25,7 +26,7 @@ model = dict(
         norm_cfg=backbone_norm_cfg,
         init_cfg=dict(
             type='Pretrained',
-            checkpoint='pretrain/swin_large_patch4_window12_384_22k.pth'
+            checkpoint=checkpoint_file
         )),
     decode_head=dict(
         type='UPerHead',
@@ -154,5 +155,5 @@ lr_config = dict(
     by_epoch=False)
 runner = dict(type='IterBasedRunner', max_iters=160000)
 checkpoint_config = dict(by_epoch=False, interval=16000, max_keep_ckpts=1)
-evaluation = dict(interval=16000, metric='mDice', pre_eval=True, save_best='mDice')
+evaluation = dict(interval=16000, metric='mDice', pre_eval=True, save_best='mAcc')
 auto_resume = False

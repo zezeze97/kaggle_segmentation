@@ -48,3 +48,4 @@ bash run.sh test $GPU
 - mutilabel问题，最后激活使用sigmoid而不是softmax!!
 - 实验结果整理
 - EfficientNet + Unet?  (他山之石)
+- swin transformer v2
