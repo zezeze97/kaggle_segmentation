@@ -38,14 +38,17 @@ bash run.sh test $GPU
 
 [kaggle_segmentation/inference_demo.ipynb](kaggle_segmentation/inference_demo.ipynb)
 
-# TODO
-
-- 图片尺寸较小, 可以尝试upernet origin size?(默认1/4大小) 
-- train pipline去除random crop
-- 图片case的相关性，更好的建模方式？
-- 2.5d data？
-- 更换backbone, swin transformer
+# Note
+- 2.5d data: 同一个case，同日的3张slice拼接成一张(stride=2)
 - mutilabel问题，最后激活使用sigmoid而不是softmax!!
+
+
+# TODO
+- 图片case的相关性，更好的建模方式？
+- 图片尺寸较小, 可以尝试upernet origin size?(默认1/4大小) 
 - 实验结果整理
 - 移植 https://github.com/CarnoZhao/Kaggle-UWMGIT/blob/kaggle_tractseg/mmseg/models/segmentors/smp_models.py
 - swin transformer v2
+- 更好的数据增强方式:https://www.kaggle.com/competitions/uw-madison-gi-tract-image-segmentation/discussion/331450
+- 5张slice拼接成一张，需要修改pretrained ckpts的第一层...
+
