@@ -47,5 +47,5 @@ bash run.sh test $GPU
 - 更换backbone, swin transformer
 - mutilabel问题，最后激活使用sigmoid而不是softmax!!
 - 实验结果整理
-- EfficientNet + Unet?  (他山之石)
+- 移植 https://github.com/CarnoZhao/Kaggle-UWMGIT/blob/kaggle_tractseg/mmseg/models/segmentors/smp_models.py
 - swin transformer v2
