@@ -4,35 +4,14 @@ export PYTHONPATH=/home/zhangzr/mmsegmentation_kaggle:$PYTHONPATH
 GPU=$2
 
 
-# config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_25d_multilabel
-# config=upernet_originsize_convnext_base_fp16_320x384_160k_kaggle_25d_multilabel
-# config=upernet_originsize_convnext_base_fp16_320x384_160k_kaggle_25d_multilabel_randomcrop
-# config=upernet_originsize_convnext_base_fp16_320x384_160k_kaggle_25d_multilabel_mosaic
-# config=upernet_originsize_convnext_base_fp16_320x384_16k_kaggle_25d_multilabel_mosaic_resize
-# config=upernet_originsize_convnext_base_fp16_512x512_160k_kaggle_25d_multilabel
-# config=upernet_originsize_convnext_base_fp16_320x384_160k_kaggle_25d_multilabel_diceloss
-# config=upernet_originsize_convnext_large_fp16_320x384_160k_kaggle_25d_multilabel
-# config=upernet_originsize_convnext_base_fp16_320x384_160k_kaggle_25d_multilabel_rotate
-# config=upernet_originsize_convnext_base_fp16_320x384_160k_kaggle_25d_multilabel_dice_only
-# config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_25d_multilabel_carno
-# config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_25d_multilabel_carno_debug
-# config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_1d_multilabel_carno
-# config=upernet_originsize_convnext_base_fp16_256x256_160k_kaggle_25d_multilabel_carno_rotate
-# config=upernet_originsize_convnext_base_fp16_384x384_160k_kaggle_25d_multilabel_carno_rotate
-# config=upernet_originsize_convnext_base_fp16_512x512_160k_kaggle_25d_multilabel_carno_rotate
-# config=upernet_originsize_convnext_base_fp16_768x768_160k_kaggle_25d_multilabel_carno_rotate
-# config=upernet_originsize_convnext_large_fp16_384x384_160k_kaggle_25d_multilabel_carno_rotate
-# config=upernet_originsize_convnext_large_fp16_384x384_160k_kaggle_25d_multilabel_carno
-# config=upernet_originsize_convnext_base_fp16_384x384_160k_kaggle_25d_multilabel_carno_mosaic
-# config=upernet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K
-# config=upernet_originsize_convnext_xlarge_fp16_384x384_160k_kaggle_25d_multilabel_carno_rotate
-# config=upernet_swin_large_patch4_window12_384x384_160k_kaggle25d_pretrain_384x384_22K
-# config=upernet_swin_base_patch4_window7_512x512_160k_kaggle25d_pretrain_224x224_22K
-config=upernet_swin_large_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K
+
+# config=smp_unet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K
+# config=upernet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K_TTA
+config=upernet_originsize_convnext_large_fp16_384x384_160k_kaggle_25d_multilabel_carno_rotate_tta
 
 if [ $1 = "train" ]; then
     # CUDA_VISIBLE_DEVICES=$GPU PORT=23471 ./tools/dist_train.sh configs/convnext/${config}.py 1 --work-dir cache/${config} 
-    CUDA_VISIBLE_DEVICES=$GPU PORT=23471 ./tools/dist_train.sh configs/swin/${config}.py 1 --work-dir cache/${config} 
+    CUDA_VISIBLE_DEVICES=$GPU PORT=23472 ./tools/dist_train.sh configs/swin/${config}.py 2 --work-dir cache/${config} 
 elif [ $1 = "test" ]; then
     
     # CUDA_VISIBLE_DEVICES=$GPU python ./tools/test.py configs/convnext/${config}.py ../../input/mmsegckpts/iter_1600.pth --format-only --eval-options "imgfile_prefix=./test_results/upernet_convnext_base_fp16_256x256_16k_kaggle_no_crop"
