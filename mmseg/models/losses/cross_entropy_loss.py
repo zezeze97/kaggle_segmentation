@@ -144,15 +144,19 @@ def binary_cross_entropy(pred,
     # average loss over non-ignored and valid elements
     if reduction == 'mean' and avg_factor is None and avg_non_ignore:
         avg_factor = valid_mask.sum().item()
-    # change pred and label shape: (B, Class, H, W) -> (BHW, Class)
-    # num_class = label.shape[1]
-    # pred = pred.permute(0,2,3,1).reshape(-1,num_class)
-    # label = label.permute(0,2,3,1).reshape(-1,num_class)
-    loss = F.binary_cross_entropy_with_logits(
-        pred, label.float(), pos_weight=class_weight, reduction='none')
-    # do the reduction for the weighted loss
-    loss = weight_reduce_loss(
-        loss, weight, reduction=reduction, avg_factor=avg_factor)
+    if class_weight is None:
+        loss = F.binary_cross_entropy_with_logits(
+            pred, label.float(), pos_weight=class_weight, reduction='none')
+        # do the reduction for the weighted loss
+        loss = weight_reduce_loss(
+            loss, weight, reduction=reduction, avg_factor=avg_factor)
+    else:
+        # change pred and label shape: (B, Class, H, W) -> (BHW, Class)
+        num_class = label.shape[1]
+        pred = pred.permute(0,3,1,2).reshape(-1,num_class)
+        label = label.permute(0,3,1,2).reshape(-1,num_class)
+        loss = F.binary_cross_entropy_with_logits(
+            pred, label.float(), pos_weight=class_weight, reduction='mean')
 
     return loss
 
