@@ -39,7 +39,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0, class_weight=[10,10,10])),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0, class_weight=[144,157,285])),
     auxiliary_head=dict(
         type='FCNHead',
         in_channels=512,
@@ -52,7 +52,7 @@ model = dict(
         norm_cfg=norm_cfg,
         align_corners=False,
         loss_decode=dict(
-            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=0.4, class_weight=[10,10,10])),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=0.4, class_weight=[144,157,285])),
     train_cfg=dict(),
     test_cfg=dict(mode='whole',multi_label=True))
 dataset_type = 'Kaggle_Dataset'
