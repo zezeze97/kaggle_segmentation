@@ -153,8 +153,8 @@ def binary_cross_entropy(pred,
     else:
         # change pred and label shape: (B, Class, H, W) -> (BHW, Class)
         num_class = label.shape[1]
-        pred = pred.permute(0,3,1,2).reshape(-1,num_class)
-        label = label.permute(0,3,1,2).reshape(-1,num_class)
+        pred = pred.permute(0,2,3,1).reshape(-1,num_class)
+        label = label.permute(0,2,3,1).reshape(-1,num_class)
         loss = F.binary_cross_entropy_with_logits(
             pred, label.float(), pos_weight=class_weight, reduction='mean')
 
