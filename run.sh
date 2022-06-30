@@ -10,7 +10,8 @@ GPU=$2
 # config=upernet_originsize_convnext_large_fp16_384x384_160k_kaggle_25d_multilabel_carno_rotate_tta
 # config=smp_unet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K_TTA
 # config=upernet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K_TTA_Dice
-config=upernet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K_TTA_class_weight
+# config=upernet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K_TTA_class_weight
+config=upernet_swin_base_patch4_window7_384x384_160k_kaggle25d_pretrain_224x224_22K_TTA_5c
 if [ $1 = "train" ]; then
     # CUDA_VISIBLE_DEVICES=$GPU PORT=23471 ./tools/dist_train.sh configs/convnext/${config}.py 2 --work-dir cache/${config} 
     CUDA_VISIBLE_DEVICES=$GPU PORT=23472 ./tools/dist_train.sh configs/swin/${config}.py 2 --work-dir cache/${config} 
