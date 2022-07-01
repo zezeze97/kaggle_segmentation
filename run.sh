@@ -20,3 +20,13 @@ elif [ $1 = "test" ]; then
     CUDA_VISIBLE_DEVICES=$GPU ./tools/dist_test.sh configs/convnext/${config}.py ./cache/upernet_originsize_convnext_base_fp16_320x384_160k_kaggle_25d_multilabel/best_mDice_iter_64000.pth 2 --eval mDice # --format-only --eval-options "imgfile_prefix=./test_results/upernet_convnext_base_fp16_256x256_16k_kaggle_no_crop"
 fi
 
+
+
+###### dengjy env ######
+
+# torch==1.11.0        
+# torchvision==0.12.0  
+# torchaudio==0.11.0   
+# pip install timm     
+
+########################
