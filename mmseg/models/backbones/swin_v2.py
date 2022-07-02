@@ -266,7 +266,7 @@ class SwinTransformerBlock(nn.Module):
 
         self.register_buffer("attn_mask", attn_mask)
 
-    def forward(self, x):
+    def forward(self, x, mask_matrix):
         H, W = self.input_resolution
         B, L, C = x.shape
         assert L == H * W, "input feature has wrong size"
@@ -277,15 +277,17 @@ class SwinTransformerBlock(nn.Module):
         # cyclic shift
         if self.shift_size > 0:
             shifted_x = torch.roll(x, shifts=(-self.shift_size, -self.shift_size), dims=(1, 2))
+            attn_mask = mask_matrix
         else:
             shifted_x = x
+            attn_mask = None
 
         # partition windows
         x_windows = window_partition(shifted_x, self.window_size)  # nW*B, window_size, window_size, C
         x_windows = x_windows.view(-1, self.window_size * self.window_size, C)  # nW*B, window_size*window_size, C
 
         # W-MSA/SW-MSA
-        attn_windows = self.attn(x_windows, mask=self.attn_mask)  # nW*B, window_size*window_size, C
+        attn_windows = self.attn(x_windows, mask=attn_mask)  # nW*B, window_size*window_size, C
 
         # merge windows
         attn_windows = attn_windows.view(-1, self.window_size, self.window_size, C)
@@ -338,7 +340,7 @@ class PatchMerging(nn.Module):
         self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
         self.norm = norm_layer(2 * dim)
 
-    def forward(self, x):
+    def forward(self, x, H, W):
         """
         x: B, H*W, C
         """
@@ -398,6 +400,8 @@ class BasicLayer(nn.Module):
         super().__init__()
         self.dim = dim
         self.input_resolution = input_resolution
+        self.window_size = window_size
+        self.shift_size = window_size // 2
         self.depth = depth
         self.use_checkpoint = use_checkpoint
 
@@ -420,15 +424,40 @@ class BasicLayer(nn.Module):
         else:
             self.downsample = None
 
-    def forward(self, x):
+    def forward(self, x, H, W):
+        # calculate attention mask for SW-MSA
+        Hp = int(np.ceil(H / self.window_size)) * self.window_size
+        Wp = int(np.ceil(W / self.window_size)) * self.window_size
+        img_mask = torch.zeros((1, Hp, Wp, 1), device=x.device)  # 1 Hp Wp 1
+        h_slices = (slice(0, -self.window_size),
+                    slice(-self.window_size, -self.shift_size),
+                    slice(-self.shift_size, None))
+        w_slices = (slice(0, -self.window_size),
+                    slice(-self.window_size, -self.shift_size),
+                    slice(-self.shift_size, None))
+        cnt = 0
+        for h in h_slices:
+            for w in w_slices:
+                img_mask[:, h, w, :] = cnt
+                cnt += 1
+
+        mask_windows = window_partition(img_mask, self.window_size)  # nW, window_size, window_size, 1
+        mask_windows = mask_windows.view(-1, self.window_size * self.window_size)
+        attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
+        attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(attn_mask == 0, float(0.0))
+
         for blk in self.blocks:
+            blk.H, blk.W = H, W
             if self.use_checkpoint:
-                x = checkpoint.checkpoint(blk, x)
+                x = checkpoint.checkpoint(blk, x, attn_mask)
             else:
-                x = blk(x)
+                x = blk(x, attn_mask)
         if self.downsample is not None:
-            x = self.downsample(x)
-        return x
+            x_down = self.downsample(x, H, W)
+            Wh, Ww = (H + 1) // 2, (W + 1) // 2
+            return x, H, W, x_down, Wh, Ww
+        else:
+            return x, H, W, x, H, W 
 
     def extra_repr(self) -> str:
         return f"dim={self.dim}, input_resolution={self.input_resolution}, depth={self.depth}"
@@ -483,10 +512,12 @@ class PatchEmbed(nn.Module):
         # FIXME look at relaxing size constraints
         assert H == self.img_size[0] and W == self.img_size[1], \
             f"Input image size ({H}*{W}) doesn't match model ({self.img_size[0]}*{self.img_size[1]})."
-        x = self.proj(x).flatten(2).transpose(1, 2)  # B Ph*Pw C
+        x = self.proj(x)
+        out_size = (x.shape[2], x.shape[3])
+        x = x.flatten(2).transpose(1, 2)  # B Ph*Pw C
         if self.norm is not None:
             x = self.norm(x)
-        return x
+        return x, out_size
 
     def flops(self):
         Ho, Wo = self.patches_resolution
@@ -641,19 +672,19 @@ class SwinTransformerV2(nn.Module):
     '''
 
     def forward(self, x):
-        x = self.patch_embed(x)
-        Wh, Ww = x.size(2), x.size(3)
+        x, hw_shape = self.patch_embed(x)
+        Wh, Ww = hw_shape
 
         if self.ape:
             absolute_pos_embed = F.interpolate(self.absolute_pos_embed, size=(Wh, Ww), mode='bicubic')
-            x = (x + absolute_pos_embed).flatten(2).transpose(1, 2)
+            x = (x + absolute_pos_embed).flatten(2)
         else:
-            x = x.flatten(2).transpose(1, 2)
+            x = x.flatten(2)
         x = self.pos_drop(x)
 
         outs = []
         for i in range(self.num_layers):
-            layer = self.layer[i]
+            layer = self.layers[i]
             x_out, H, W, x, Wh, Ww = layer(x, Wh, Ww)
 
             if i in self.out_indices:
