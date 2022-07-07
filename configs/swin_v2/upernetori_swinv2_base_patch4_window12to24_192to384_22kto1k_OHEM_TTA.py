@@ -57,7 +57,7 @@ train_pipeline = [
     dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', force_uint8=True, force_3channel=False),
     dict(type='LoadAnnotations',reduce_zero_label=False),
     dict(type='Resize', img_scale=img_scale, keep_ratio=True),
-    # dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
+    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='RandomRotate', prob=0.5, degree=(-30, 30), pad_val=0, seg_pad_val=0, center=None, auto_bound=False),
@@ -72,6 +72,7 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=img_scale,
+        img_ratios=[0.75, 1.0, 1.25],
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
