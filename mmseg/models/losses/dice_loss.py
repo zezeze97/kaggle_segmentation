@@ -36,7 +36,7 @@ def dice_loss(pred,
 
 
 @weighted_loss
-def binary_dice_loss(pred, target, valid_mask, smooth=1, exponent=2, **kwards):
+def binary_dice_loss(pred, target, valid_mask, smooth=1, exponent=2, **kwargs):
     assert pred.shape[0] == target.shape[0]
     pred = pred.reshape(pred.shape[0], -1)
     target = target.reshape(target.shape[0], -1)
@@ -83,7 +83,7 @@ class DiceLoss(nn.Module):
                  ignore_index=255,
                  multi_label=False,
                  loss_name='loss_dice',
-                 **kwards):
+                 **kwargs):
         super(DiceLoss, self).__init__()
         self.smooth = smooth
         self.exponent = exponent
@@ -99,7 +99,7 @@ class DiceLoss(nn.Module):
                 target,
                 avg_factor=None,
                 reduction_override=None,
-                **kwards):
+                **kwargs):
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
             reduction_override if reduction_override else self.reduction)
