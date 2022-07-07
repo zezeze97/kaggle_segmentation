@@ -7,19 +7,19 @@ model = dict(
         type='SwinTransformerV2',
         in_chans=3,
         img_size=384,
-        embed_dim=128,
+        embed_dim=192,
         depths=[2,2,18,2],
-        num_heads=[4,8,16,32],
+        num_heads=[6,12,24,48],
         window_size=24,
         pretrained_window_sizes=[12,12,12,6],
         drop_path_rate=0.2,
         init_cfg=dict(
             type='Pretrained',
-            checkpoint='https://github.com/SwinTransformer/storage/releases/download/v2.0.0/swinv2_base_patch4_window12to24_192to384_22kto1k_ft.pth'
+            checkpoint='https://github.com/SwinTransformer/storage/releases/download/v2.0.0/swinv2_large_patch4_window12to24_192to384_22kto1k_ft.pth'
         )),
     decode_head=dict(
-        type='UPerHeadOriginSize',
-        in_channels=[128, 256, 512, 1024],
+        type='UPerHead',
+        in_channels=[192, 384, 768, 1536],
         in_index=[0, 1, 2, 3],
         pool_scales=(1, 2, 3, 6),
         channels=512,
@@ -32,7 +32,7 @@ model = dict(
             type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0)),
     auxiliary_head=dict(
         type='FCNHead',
-        in_channels=512,
+        in_channels=768,
         in_index=2,
         channels=256,
         num_convs=1,
@@ -56,8 +56,8 @@ img_scale = (384, 384)
 train_pipeline = [
     dict(type='LoadImageFromFile', to_float32=True, color_type='unchanged', force_uint8=True, force_3channel=False),
     dict(type='LoadAnnotations',reduce_zero_label=False),
-    dict(type='Resize', img_scale=img_scale, keep_ratio=True, ratio_range=(0.75, 1.25)),
-    dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
+    dict(type='Resize', img_scale=img_scale, keep_ratio=True),
+    # dict(type='RandomCrop', crop_size=crop_size, cat_max_ratio=0.75),
     dict(type='RandomFlip', prob=0.5, direction='horizontal'),
     dict(type='RandomFlip', prob=0.5, direction='vertical'),
     dict(type='RandomRotate', prob=0.5, degree=(-30, 30), pad_val=0, seg_pad_val=0, center=None, auto_bound=False),
@@ -72,7 +72,6 @@ test_pipeline = [
     dict(
         type='MultiScaleFlipAug',
         img_scale=img_scale,
-        img_ratios=[0.75, 1.0, 1.25],
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
