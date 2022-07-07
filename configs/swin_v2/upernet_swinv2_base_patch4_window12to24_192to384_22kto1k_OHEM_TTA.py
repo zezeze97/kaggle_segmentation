@@ -6,15 +6,16 @@ model = dict(
     backbone=dict(
         type='SwinTransformerV2',
         in_chans=3,
-        embed_dim=192,
-        depths=[2, 2, 18, 2],
-        num_heads=[6, 12, 24, 48],
+        img_size=384,
+        embed_dim=128,
+        depths=[2,2,18,2],
+        num_heads=[4,8,16,32],
         window_size=24,
-        pretrained_window_sizes=[12, 12, 12, 6],
-        use_checkpoint=True,
+        pretrained_window_sizes=[12,12,12,6],
+        drop_path_rate=0.2,
         init_cfg=dict(
             type='Pretrained',
-            checkpoint='https://github.com/SwinTransformer/storage/releases/download/v2.0.0/swinv2_base_patch4_window12_192_22k.pth'
+            checkpoint='https://github.com/SwinTransformer/storage/releases/download/v2.0.0/swinv2_base_patch4_window12to24_192to384_22kto1k_ft.pth'
         )),
     decode_head=dict(
         type='UPerHead',
@@ -82,7 +83,7 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=4,
+    samples_per_gpu=2,
     workers_per_gpu=4,
    train=dict(
         type=dataset_type,
