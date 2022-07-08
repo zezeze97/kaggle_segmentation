@@ -18,7 +18,7 @@ model = dict(
             checkpoint='https://github.com/SwinTransformer/storage/releases/download/v2.0.0/swinv2_base_patch4_window12to24_192to384_22kto1k_ft.pth'
         )),
     decode_head=dict(
-        type='UPerHeadOriginSize',
+        type='UPerHead',
         in_channels=[128, 256, 512, 1024],
         in_index=[0, 1, 2, 3],
         pool_scales=(1, 2, 3, 6),
